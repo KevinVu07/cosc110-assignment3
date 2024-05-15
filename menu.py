@@ -1,62 +1,93 @@
 from tkinter import *
 from tkinter import ttk
+from time import time
 
 
 byte_burger = {
-    "burger_name": "byte burger",
-    "bun_type": "milk",
-    "sauce_type": "tomato",
+    "burger_name": "Byte Burger",
+    "bun_type": "Milk",
+    "sauce_type": "Tomato",
     "number_of_patties": 1,
     "number_of_cheese_slices": 0,
-    "tomato included": False,
-    "lettuce included": True,
-    "onion included": False,
+    "tomato_included": False,
+    "lettuce_included": True,
+    "onion_included": False,
 }
 
 ctrl_alt_delicious = {
     "burger_name": "Ctrl-Alt-Delicious",
-    "bun_type": "milk",
-    "sauce_type": "barbecue",
+    "bun_type": "Milk",
+    "sauce_type": "Barbecue",
     "number_of_patties": 2,
     "number_of_cheese_slices": 2,
-    "tomato included": True,
-    "lettuce included": True,
-    "onion included": True,
+    "tomato_included": True,
+    "lettuce_included": True,
+    "onion_included": True,
 }
 
 data_crunch = {
     "burger_name": "Data Crunch",
-    "bun_type": "gluten free",
-    "sauce_type": "tomato",
+    "bun_type": "Gluten Free",
+    "sauce_type": "Tomato",
     "number_of_patties": 0,
     "number_of_cheese_slices": 0,
-    "tomato included": True,
-    "lettuce included": True,
-    "onion included": True,
+    "tomato_included": True,
+    "lettuce_included": True,
+    "onion_included": True,
 }
 
 code_cruncher = {
     "burger_name": "Code Cruncher",
-    "bun_type": "milk",
-    "sauce_type": "tomato",
+    "bun_type": "Milk",
+    "sauce_type": "Tomato",
     "number_of_patties": 3,
     "number_of_cheese_slices": 3,
-    "tomato included": True,
-    "lettuce included": True,
-    "onion included": True,
+    "tomato_included": True,
+    "lettuce_included": True,
+    "onion_included": True,
 }
 
-burgers_list = [
-    {"Byte Burger": byte_burger},
-    {"Ctrl-Alt-Delicious": ctrl_alt_delicious},
-    {"Data Crunch": data_crunch},
-    {"Code Cruncher": code_cruncher},
-]
+burgers_dict = {
+    "Byte Burger": byte_burger,
+    "Ctrl-Alt-Delicious": ctrl_alt_delicious,
+    "Data Crunch": data_crunch,
+    "Code Cruncher": code_cruncher,
+}
+
+cycle_job = None  # Initialize cycle_job globally
 
 
-def displayBurgerDetails(name):
+def cycle_burgers_details(initial=True):
+    global current_index, cycle_job  # Declare global variables
+    if initial:
+        current_index = 0
+        display_burger_details(list(burgers_dict.keys())[current_index])
+    else:
+        burger_names = list(burgers_dict.keys())
+        current_index = (current_index + 1) % len(burger_names)
+        display_burger_details(burger_names[current_index])
+    cycle_job = root.after(5000, cycle_burgers_details, False)
+
+
+# Function to handle button clicks
+def button_click(burger_name):
+    global cycle_job, current_index  # Declare global variables
+    display_burger_details(burger_name)
+    current_index = list(burgers_dict.keys()).index(burger_name)  # Update current_index
+    root.after_cancel(cycle_job)  # Cancel automatic cycling
+    cycle_job = root.after(
+        5000, cycle_burgers_details, False
+    )  # Reset automatic cycling timer
+
+
+def display_burger_details(name):
     # use the burger name passed in to display the specified burger details
-    print(name)
+    # print(name)
+    burger = burgers_dict[name]
+    cost = get_cost(name)
+    # print(burger)
+    burger_display = f"Burger name: {burger['burger_name']}\nBun type: {burger['bun_type']}\nSauce type: {burger['sauce_type']}\nNumber of patties: {burger['number_of_patties']}\nNumber of slices of cheese: {burger['number_of_cheese_slices']}\nTomato included: {'No' if burger['tomato_included'] == False else 'Yes'}\nLettuce included: {'No' if burger['lettuce_included'] == False else 'Yes'}\nOnion included: {'No' if burger['onion_included'] == False else 'Yes'}\nPrice: ${cost}"
+    burger_details.set(burger_display)
 
 
 def get_cost(burger_name):
@@ -64,20 +95,20 @@ def get_cost(burger_name):
     determine the cost of a burger via the burger name passed in as a parameter
 
     parameters:
-        - burger_name: the name of the burger clicked on by the user
+        - burger_name: the name of th2  e burger clicked on by the user
     returns:
         cost of burger as integer
     """
 
     # extracting the burger ingredients from the burger list dictionary
-    burger = burgers_list[burger_name]
+    burger = burgers_dict[burger_name]
     bun_type = burger["bun_type"]
     sauce_type = burger["sauce_type"]
     number_of_patties = burger["number_of_patties"]
     number_of_cheese_slices = burger["number_of_cheese_slices"]
-    has_tomato = burger["tomato included"]
-    has_lettuce = burger["lettuce included"]
-    has_onion = burger["onion included"]
+    has_tomato = burger["tomato_included"]
+    has_lettuce = burger["lettuce_included"]
+    has_onion = burger["onion_included"]
 
     # the base cost of a burger
     total_cost = 5
@@ -113,39 +144,49 @@ def get_cost(burger_name):
 root = Tk()
 root.title("Welcome to Codetown Burger Co")
 
-mainframe = ttk.Frame(root, padding="3 3 12 12")
-mainframe.grid(column=0, row=0, sticky=(N, W, E, S))
+# Set weight for columns and rows
 root.columnconfigure(0, weight=1)
 root.rowconfigure(0, weight=1)
 
-burger_details = ttk.Frame(mainframe)
+mainframe = ttk.Frame(root, padding="3 3 12 12")
+# Configure sticky option for mainframe
+mainframe.grid(column=0, row=0, sticky=(N, W, E, S))
+
+burger_details = StringVar()
+burger_display_label = ttk.Label(mainframe, textvariable=burger_details)
+# Configure widget options for burger display label
+burger_display_label.grid(column=0, row=1, sticky=(N, W, E, S), columnspan=4)
+
 
 burger_name = StringVar()
 byte_burger = ttk.Button(
     mainframe,
     text="Byte Burger",
-    command=lambda name="Byte Burger": displayBurgerDetails(name),
+    command=lambda name="Byte Burger": button_click(name),
 )
 ctrl_alt_delicious = ttk.Button(
     mainframe,
     text="Ctrl-Alt-Delicious",
-    command=lambda name="Ctrl-Alt-Delicious": displayBurgerDetails(name),
+    command=lambda name="Ctrl-Alt-Delicious": button_click(name),
 )
 data_crunch = ttk.Button(
     mainframe,
     text="Data Crunch",
-    command=lambda name="Data Crunch": displayBurgerDetails(name),
+    command=lambda name="Data Crunch": button_click(name),
 )
 code_cruncher = ttk.Button(
     mainframe,
     text="Code Cruncher",
-    command=lambda name="Code Cruncher": displayBurgerDetails(name),
+    command=lambda name="Code Cruncher": button_click(name),
 )
 
-burger_details.grid(column=0, row=1, columnspan=4, sticky=(N, E, S, W))
+# Configure widget options for buttons
 byte_burger.grid(column=0, row=2, sticky=(W, E))
 ctrl_alt_delicious.grid(column=1, row=2, sticky=(W, E))
 data_crunch.grid(column=2, row=2, sticky=(W, E))
 code_cruncher.grid(column=3, row=2, sticky=(W, E))
+
+cycle_burgers_details()
+
 
 root.mainloop()
