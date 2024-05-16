@@ -86,7 +86,7 @@ def display_burger_details(name):
     burger = burgers_dict[name]
     cost = get_cost(name)
     # print(burger)
-    burger_display = f"Burger name: {burger['burger_name']}\nBun type: {burger['bun_type']}\nSauce type: {burger['sauce_type']}\nNumber of patties: {burger['number_of_patties']}\nNumber of slices of cheese: {burger['number_of_cheese_slices']}\nTomato included: {'No' if burger['tomato_included'] == False else 'Yes'}\nLettuce included: {'No' if burger['lettuce_included'] == False else 'Yes'}\nOnion included: {'No' if burger['onion_included'] == False else 'Yes'}\nPrice: ${cost}"
+    burger_display = f"Burger name: {burger['burger_name']}\n\nBun type: {burger['bun_type']}\n\nSauce type: {burger['sauce_type']}\n\nNumber of patties: {burger['number_of_patties']}\n\nNumber of slices of cheese: {burger['number_of_cheese_slices']}\n\nTomato included: {'No' if burger['tomato_included'] == False else 'Yes'}\n\nLettuce included: {'No' if burger['lettuce_included'] == False else 'Yes'}\n\nOnion included: {'No' if burger['onion_included'] == False else 'Yes'}\n\nPrice: ${cost}"
     burger_details.set(burger_display)
 
 
@@ -147,15 +147,22 @@ root.title("Welcome to Codetown Burger Co")
 # Set weight for columns and rows
 root.columnconfigure(0, weight=1)
 root.rowconfigure(0, weight=1)
+root.resizable(False, False)
 
-mainframe = ttk.Frame(root, padding="3 3 12 12")
+mainframe = ttk.Frame(root, padding="3 3 12 12", width=200, height=400)
 # Configure sticky option for mainframe
-mainframe.grid(column=0, row=0, sticky=(N, W, E, S))
+mainframe.grid(column=0, row=0, sticky=(N, S))
+
+
+labelframe = ttk.Frame(mainframe, width=200, height=300)
+# Configure sticky option for mainframe
+labelframe.grid(column=0, row=0, columnspan=4)
 
 burger_details = StringVar()
-burger_display_label = ttk.Label(mainframe, textvariable=burger_details)
+burger_display_label = ttk.Label(labelframe, textvariable=burger_details)
 # Configure widget options for burger display label
-burger_display_label.grid(column=0, row=1, sticky=(N, W, E, S), columnspan=4)
+burger_display_label.grid(column=0, row=1, sticky=(E, W), columnspan=4)
+burger_display_label.place(x=100, y=150, anchor=CENTER)
 
 
 burger_name = StringVar()
@@ -188,5 +195,7 @@ code_cruncher.grid(column=3, row=2, sticky=(W, E))
 
 cycle_burgers_details()
 
+for child in mainframe.winfo_children():
+    child.grid_configure(padx=5, pady=5)
 
 root.mainloop()
